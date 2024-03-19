@@ -48,8 +48,16 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                           },
                               children=[
                                   # Container for Size, Accuracy, Time
-                                  html.Div(style={'display': 'flex', 'justifyContent': 'space-evenly', 'color': 'white',
-                                                  'padding': '10px'},
+                                  html.Div(style={
+                                      'display': 'flex',
+                                      'justifyContent': 'space-evenly',
+                                      'color': 'white',
+                                      'padding': '10px',
+                                      'fontFamily': 'Arial',
+                                      'fontWeight': 'bold',
+                                      'fontSize': '24px',
+                                      'marginTop': '20px'},
+
                                            children=[
                                                html.Div(id='image-size', children='Size: '),
                                                html.Div(id='accuracy', children='Accuracy: '),
@@ -58,12 +66,21 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                                   dcc.Interval(id='update-time', interval=1000, n_intervals=0),  # Timer
 
                                   # Container for the original and classified images
-                                  html.Div(style={'flexGrow': '1', 'display': 'flex', 'flexDirection': 'row',
-                                                  'alignItems': 'center', 'justifyContent': 'space-evenly'},
+                                  html.Div(style={
+                                      'flexGrow': '1',
+                                      'display': 'flex',
+                                      'flexDirection': 'row',
+                                      'alignItems': 'center',
+                                      'justifyContent': 'space-evenly'},
+
                                            children=[
                                                html.Div(id='original-image',
-                                                        style={'maxWidth': '100%', 'maxHeight': '30vh',
-                                                               'marginLeft': '5px', 'float': 'left'}),
+                                                        style={
+                                                            'maxWidth': '100%',
+                                                            'maxHeight': '30vh',
+                                                            'marginLeft': '5px',
+                                                            'float': 'left'}),
+
                                                html.Div(id='classified-image',
                                                         style={'maxWidth': '100%', 'maxHeight': '30vh',
                                                                'marginLeft': '5px', 'float': 'left'}),
@@ -73,51 +90,93 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                           # Right Container
                           html.Div([
                               html.Img(src=app.get_asset_url('Arkwiz_Logo.png'),
-                                       style={'width': '60%', 'height': 'auto', 'display': 'block',
-                                              'marginLeft': 'auto', 'marginRight': 'auto', 'marginTop': '20px'}),
+                                       style={
+                                           'width': '60%',
+                                           'height': 'auto',
+                                           'display': 'block',
+                                           'marginLeft': 'auto',
+                                           'marginRight': 'auto',
+                                           'marginTop': '20px'}),
+
                               html.Div(id='file-path', children='No file selected',
-                                       style={'color': 'white', 'textAlign': 'center', 'margin': 'auto',
-                                              'fontFamily': 'Arial', 'fontWeight': 'bold', 'fontSize': '20px',
-                                              'marginTop': '60px'}),
+                                       style={
+                                           'color': 'white',
+                                           'textAlign': 'center',
+                                           'margin': 'auto',
+                                           'fontFamily': 'Arial',
+                                           'fontWeight': 'bold',
+                                           'fontSize': '20px',
+                                           'marginTop': '60px'}),
+
                               dcc.Upload(
                                   id='upload-image',
-                                  children=html.Button('Upload Image', style={'height': '80px', 'width': '200px',
-                                                                              'backgroundColor': 'rgba(18, 88, 103, 1)',
-                                                                              'color': 'rgba(255, 255, 255, 1)',
-                                                                              'fontFamily': 'Arial',
-                                                                              'fontWeight': 'bold', 'fontSize': '24px',
-                                                                              'borderWidth': '1px',
-                                                                              'borderStyle': 'none',
-                                                                              'borderRadius': '10px',
-                                                                              'textAlign': 'center', 'margin': 'auto',
-                                                                              'display': 'block'}),
-                                  style={'width': '60%', 'height': '60px', 'lineHeight': '60px', 'borderWidth': '1px',
-                                         'borderStyle': 'none', 'borderRadius': '0px', 'textAlign': 'center',
-                                         'margin': '110px auto', 'marginBottom': '10px'},
+                                  children=html.Button('Upload Image', style={
+                                      'height': '80px', 'width': '200px',
+                                      'backgroundColor': 'rgba(18, 88, 103, 1)',
+                                      'color': 'rgba(255, 255, 255, 1)',
+                                      'fontFamily': 'Arial',
+                                      'fontWeight': 'bold', 'fontSize': '24px',
+                                      'borderWidth': '1px',
+                                      'borderStyle': 'none',
+                                      'borderRadius': '10px',
+                                      'textAlign': 'center',
+                                      'margin': 'auto',
+                                      'display': 'block'}),
+
+                                  style={
+                                      'width': '60%',
+                                      'height': '60px',
+                                      'lineHeight': '60px',
+                                      'borderWidth': '1px',
+                                      'borderStyle': 'none',
+                                      'borderRadius': '0px',
+                                      'textAlign': 'center',
+                                      'margin': '110px auto',
+                                      'marginBottom': '10px'},
+
                                   multiple=False,
                                   accept='.jpg'
                               ),
                               html.Div([
                                   dcc.Graph(id='classification-graph', figure=fig),
                               ], style={'marginTop': '20px'}),
-                          ], style={'width': '30%', 'height': '100vh', 'float': 'right', 'display': 'flex',
-                                    'flexDirection': 'column', 'justifyContent': 'flex-start',
-                                    'backgroundColor': 'rgba(88, 98, 105, 1)'})
+                          ], style={
+                              'width': '30%',
+                              'height': '100vh',
+                              'float': 'right',
+                              'display': 'flex',
+                              'flexDirection': 'column',
+                              'justifyContent': 'flex-start',
+                              'backgroundColor': 'rgba(88, 98, 105, 1)'})
                       ])
 
 
 @callback(
-    [Output('original-image', 'children'), Output('classified-image', 'children')],
+    [Output('original-image', 'children'),
+     Output('classified-image', 'children')],
     [Input('upload-image', 'contents')]
 )
 def update_image(contents):
     if contents is None:
         no_image_message = "Please upload the image you wish to classify!"
         return html.Div(no_image_message,
-                        style={'color': 'white', 'textAlign': 'center', 'margin': 'auto', 'fontFamily': 'Arial',
-                               'fontWeight': 'bold', 'fontSize': '20px', 'marginTop': '60px'}), html.Div(
-            no_image_message, style={'color': 'white', 'textAlign': 'center', 'margin': 'auto', 'fontFamily': 'Arial',
-                                     'fontWeight': 'bold', 'fontSize': '20px', 'marginTop': '60px'})
+                        style={
+                            'color': 'white',
+                            'textAlign': 'center',
+                            'margin': 'auto',
+                            'fontFamily': 'Arial',
+                            'fontWeight': 'bold',
+                            'fontSize': '20px',
+                            'marginTop': '60px'}), html.Div(
+            no_image_message, style={
+                'color': 'white',
+                'textAlign': 'center',
+                'margin': 'auto',
+                'fontFamily': 'Arial',
+                'fontWeight': 'bold',
+                'fontSize': '20px',
+                'marginTop': '60px'})
+
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     img_src = f'data:image/jpg;base64,{content_string}'
