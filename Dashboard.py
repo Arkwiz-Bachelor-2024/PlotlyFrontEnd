@@ -27,9 +27,12 @@ app.index_string = '''
 '''
 
 labels = ['TREE', 'WATER', 'BUILDING', 'GRASS']
-values = [450, 300, 150, 100]
+values = [250, 300, 150, 200]
 
-fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
+fig = go.Figure(data=[go.Pie(labels=labels, values=values, marker=dict(colors=['#24AECB', '#187588', '#0F4A56', '#061F24']),
+                             textinfo='label+percent',
+                             insidetextfont=dict(color='white', size=10),
+                             outsidetextfont=dict(color='white', size=10),)])
 fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
 
@@ -47,23 +50,6 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                               'backgroundColor': 'rgba(43, 53, 59, 1)',
                           },
                               children=[
-                                  # Container for Size, Accuracy, Time
-                                  html.Div(style={
-                                      'display': 'flex',
-                                      'justifyContent': 'space-evenly',
-                                      'color': 'white',
-                                      'padding': '10px',
-                                      'fontFamily': 'Arial',
-                                      'fontWeight': 'bold',
-                                      'fontSize': '24px',
-                                      'marginTop': '20px'},
-
-                                           children=[
-                                               html.Div(id='image-size', children='Size: '),
-                                               html.Div(id='accuracy', children='Accuracy: '),
-                                               html.Div(id='timer', children='Time: 0'),
-                                           ]),
-                                  dcc.Interval(id='update-time', interval=1000, n_intervals=0),  # Timer
 
                                   # Container for the original and classified images
                                   html.Div(style={
@@ -71,7 +57,9 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                                       'display': 'flex',
                                       'flexDirection': 'row',
                                       'alignItems': 'center',
-                                      'justifyContent': 'space-evenly'},
+                                      'justifyContent': 'space-evenly',
+                                      'marginTop': '20px',
+                                  },
 
                                            children=[
                                                html.Div(id='original-image',
@@ -85,6 +73,26 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                                                         style={'maxWidth': '100%', 'maxHeight': '30vh',
                                                                'marginLeft': '5px', 'float': 'left'}),
                                            ]),
+                                  # Container for Size, Accuracy, Time
+                                  html.Div(style={
+                                      'display': 'flex',
+                                      'justifyContent': 'space-evenly',
+                                      'color': 'white',
+                                      'padding': '10px',
+                                      'fontFamily': 'Arial',
+                                      'fontWeight': 'bold',
+                                      'fontSize': '24px',
+                                      'margin': '20px'
+                                  },
+
+                                           children=[
+                                               html.Div(id='image-size', children='Size: '),
+                                               html.Div(id='accuracy', children='Accuracy: '),
+                                               html.Div(id='timer', children='Time: 0'),
+                                           ]),
+                                  dcc.Interval(id='update-time', interval=1000, n_intervals=0),  # Timer
+
+
                               ]),
 
                           # Right Container
@@ -135,7 +143,7 @@ app.layout = html.Div(style={'width': '100%', 'height': '100vh', 'overflow': 'hi
                                       'marginBottom': '10px'},
 
                                   multiple=False,
-                                  accept='.jpg'
+                                  accept='.tiff , .jpg'
                               ),
                               html.Div([
                                   dcc.Graph(id='classification-graph', figure=fig),
