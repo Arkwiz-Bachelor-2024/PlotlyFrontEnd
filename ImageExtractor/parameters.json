@@ -1,11 +1,11 @@
 {
-    "center_lat": 62.50981282704442,
-    "center_lon": 6.290979702191828,
-    "output_location": "C:\\Users\\jakob\\Documents\\Studie\\3rdYear\\6thSemester\\Bachelour\\PlotlyFrontEnd\\ImageExtractor\\Images",
+    "center_lat": 62.46919768788825,
+    "center_lon": 6.229872732006291,
+    "output_location": "ImageExtractor\\Images",
     "scripts": {
-        "Download_Aerial_1km.py": {
+        "ImageExtractor/Download_Aerial_1km.py": {
             "execute": true,
-            "crop": true,
+            "crop": false,
             "bbox_size_km_download": 1200,
             "bbox_size_km_crop": 1000,
             "data_type": "aerial_1km_DL",

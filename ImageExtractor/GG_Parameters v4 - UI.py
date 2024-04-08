@@ -3,8 +3,8 @@ from tkinter import Checkbutton, IntVar, Listbox, END
 import json
 
 # Assuming PARAMETERS_PATH is defined (for loading/saving script configs)
-PARAMETERS_PATH = 'parameters.json'
-HISTORY_PATH = 'history.json'
+PARAMETERS_PATH = 'ImageExtractor\\parameters.json'
+HISTORY_PATH = 'ImageExtractor\\history.json'
 
 def load_parameters():
     try:

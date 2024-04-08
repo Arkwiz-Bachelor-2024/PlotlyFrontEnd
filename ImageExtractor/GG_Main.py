@@ -16,12 +16,12 @@ from math import cos, pi
 
 # Run GG_Parameters.py to update the JSON file
 print("Running GG_Parameters v4 - UI.py")
-subprocess.run(["python", "GG_Parameters v4 - UI.py"], check=True)
+subprocess.run(["python", "ImageExtractor\\GG_Parameters v4 - UI.py"], check=True)
 print("Parameters updated")
 
 # Load parameters from a JSON file
 print("Loading parameters from JSON")
-with open('parameters.json', 'r') as f:
+with open('ImageExtractor\\parameters.json', 'r') as f:
     parameters = json.load(f)
 
 # Extract script configurations from the loaded parameters
