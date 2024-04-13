@@ -103,8 +103,7 @@ button {
     border-radius: 10px;
     text-align: center;
     margin: auto;
-    display: block;  
-    margin-top: 60px; 
+    display: block;
 }
 
 button:hover {
@@ -115,7 +114,7 @@ button:active {
     opacity: 0.4;
 }
 
-.input-validation {
+.input-validation, .checker {
     color: #f85151;
     font-size: 14px;
     margin: 10px auto;
@@ -125,4 +124,5 @@ button:active {
     display: block;
     font-family: Arial, sans-serif;
     font-weight: bold;
+    margin-bottom: 5px;
 }

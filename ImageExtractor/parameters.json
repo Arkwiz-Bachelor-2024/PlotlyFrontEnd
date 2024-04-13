@@ -50,5 +50,7 @@
             "output_file_name": "AR5_4km.png",
             "cropped_file_name": "AR5_4km_cropped.png"
         }
-    }
+    },
+    "latitude": 62.45994146853659,
+    "longitude": 6.099521131935913
 }

@@ -14,10 +14,6 @@ from math import cos, pi
 
 # This script is called "GG_Main.py" and is used to run the various scripts for downloading and processing geospatial data.
 
-# Run GG_Parameters.py to update the JSON file
-print("Running GG_Parameters v4 - UI.py")
-subprocess.run(["python", "ImageExtractor\\GG_Parameters v4 - UI.py"], check=True)
-print("Parameters updated")
 
 # Load parameters from a JSON file
 print("Loading parameters from JSON")
