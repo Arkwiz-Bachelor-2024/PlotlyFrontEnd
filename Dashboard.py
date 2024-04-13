@@ -6,13 +6,32 @@ import base64
 import re
 from dash.exceptions import PreventUpdate
 from datetime import datetime
+import json
+import subprocess
+from math import cos, pi
+import pyproj
+
+PARAMETERS_PATH = 'ImageExtractor\\parameters.json'
+
+def load_parameters():
+    try:
+        with open(PARAMETERS_PATH, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+    
+
+def save_parameters(parameters):
+    with open(PARAMETERS_PATH, 'w') as f:
+        json.dump(parameters, f, indent=4)
 
 app = Dash(__name__, suppress_callback_exceptions=True, assets_folder='assets')
 
 labels = ['TREE', 'WATER', 'BUILDING', 'GRASS']
 values = [250, 300, 150, 200]
 
-fig = go.Figure(data=[go.Pie(labels=labels, values=values, marker=dict(colors=['#24AECB', '#187588', '#0F4A56', '#061F24']),
+fig = go.Figure(data=[go.Pie(labels=labels, values=values,
+                             marker=dict(colors=['#24AECB', '#187588', '#0F4A56', '#061F24']),
                              textinfo='label+percent',
                              insidetextfont=dict(color='white', size=10),
                              outsidetextfont=dict(color='white', size=10),)])
@@ -39,20 +58,16 @@ app.layout = html.Div(className='main-container', children=[
     #Right Container
     html.Div(className='right-container', children=[
         html.Img(src=app.get_asset_url('images\Arkwiz_Logo.png'), className='logo'),
-        dcc.Input(id='latitude-longitude-input', type='text', placeholder='Latitude, Longitude', className='lat-long-input'),
-        html.Div(id='input-validation-message', className='input-validation'),
-        dcc.Upload(
-            id='upload-image-button',
-            children=html.Button('Classify', className='classify-button'),
-            className='upload-button',
-            multiple=False,
-            accept='.tiff , .jpg, .png'
-        ),
+        dcc.Input(id='latitude-longitude-input', type='text',
+                  placeholder='Latitude, Longitude', className='lat-long-input'),
+        html.Div(id='checker', className='checker'),
+        html.Button('Classify', id='submit-button', className='classify-button', n_clicks=0),
         html.Div([
             dcc.Graph(id='classification-graph', figure=fig),
         ], className='graph-container'),
     ]),
 ])
+
 
 @callback(
     [Output('original-image', 'children'),
@@ -86,6 +101,7 @@ def update_image(contents):
     image_element = html.Img(src=img_src, style={'maxWidth': '100%', 'maxHeight': '40vh', 'marginLeft': '5px'})
     return image_element, image_element
 
+
 @callback(
     Output('timer', 'children'),
     [Input('update-time', 'n_intervals')]
@@ -94,26 +110,33 @@ def update_timer(n):
     global start_time
     time_elapsed = datetime.now() - start_time
     return f"Time: {time_elapsed.seconds}"
-    
 
-@app.callback(
-    [Output('upload-image-button', 'children'),
-     Output('input-validation-message', 'children')],
-    [Input('latitude-longitude-input', 'value')]
-)
-def check_input(input_value):
-    if input_value is None:
-        return [html.Button('Classify', className='classify-button', disabled=True), ""]
+@callback(
+    Output('checker', 'children'),
+    [Input('submit-button', 'n_clicks')],
+    State('latitude-longitude-input', 'value'),
+) 
+def on_submit(n_clicks, input_value):
+    parameters = load_parameters()
+    script_configs = parameters.get('scripts', {})
+    
+    if n_clicks == 0:
+        raise PreventUpdate
+    
     try:
-        lat, lon = map(str.strip, input_value.split(','))
-        lat = float(lat)
-        lon = float(lon)
-        if -90 <= lat <= 90 and -180 <= lon <= 180:
-            return [html.Button('Classify', className='classify-button', disabled=False), ""]
+        lat, lon = map(float, input_value.split(','))
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return "Latitude or longitude is out of range."
+        
         else:
-            raise ValueError
+            parameters["center_lat"] = lat
+            parameters["center_lon"] = lon
+            save_parameters(parameters)
+            subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
+            return f"Coordinates: {lat}, {lon}"
     except ValueError:
-        return [html.Button('Classify', className='classify-button', disabled=True), "Invalid input. Please enter in the format: Latitude, Longitude"]
+        return "Invalid coordinates format."
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
