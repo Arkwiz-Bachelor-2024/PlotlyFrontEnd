@@ -125,11 +125,15 @@ profile = {
 
 print("GeoTIFF profile defined")
 
-output_image_path = args.final_output_path
+
+output_dir = os.path.join('ImageExtractor', 'Images')
+os.makedirs(output_dir, exist_ok=True)
+
+output_image_path = os.path.join(output_dir, 'output_image.tif')
 
 with rasterio.open(output_image_path, 'w', **profile) as dst:
     output_array = np.array(output_image)
     for band in range(output_array.shape[2]):
         dst.write(output_array[:, :, band], band + 1)
-
+ 
 print(f"GeoTIFF saved to {output_image_path}")

@@ -1,6 +1,6 @@
 {
-    "center_lat": 62.46919768788825,
-    "center_lon": 6.229872732006291,
+    "center_lat": 61.547392628534226,
+    "center_lon": 6.4587604532748975,
     "output_location": "ImageExtractor\\Images",
     "scripts": {
         "ImageExtractor/Download_Aerial_1km.py": {
@@ -50,5 +50,7 @@
             "output_file_name": "AR5_4km.png",
             "cropped_file_name": "AR5_4km_cropped.png"
         }
-    }
+    },
+    "latitude": 62.45994146853659,
+    "longitude": 6.099521131935913
 }
