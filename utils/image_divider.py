@@ -65,3 +65,20 @@ def merge_images(tiles_folder, output_image_path, tiles_x, tiles_y, tile_size=(5
     merged_image.save(output_image_path)
 
 #merge_images("ImageExtractor\\Images\\Divided", "ImageExtractor\\Images\\OutputFile.png",8,6)
+
+def merge_images_from_array(tiles, output_path, tile_size=(512,512)):
+    """
+    Merge an array with images to one output image
+    """
+
+    merged_image = Image.new('RGB', (8 * tile_size[0], 6 * tile_size[1]))
+
+    if len(tiles) != 6*8:
+        raise ValueError("Inputed images does not satisfy the resolution of 6 * 8 images!")
+    
+    for tile in range(len(tiles)):
+        x = (tile % 6) * 512
+        y = (tile // 6) * 512
+        merged_image.paste(tiles[tile],(y,x))
+    merged_image.save(output_path)
+    print("Image saved to output path!")
