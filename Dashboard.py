@@ -1,4 +1,6 @@
-from dash import html, dcc, Dash, Input, Output, callback, State, MATCH, ALL, no_update
+from celery import Celery
+from dash import html, dcc, Input, Output, callback, State, MATCH, ALL, no_update, Dash
+import dash
 import sys
 import os
 
@@ -7,7 +9,6 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
 import plotly.graph_objects as go
-import dash
 import base64
 import re
 from dash.exceptions import PreventUpdate
@@ -21,7 +22,6 @@ from PIL.ExifTags import TAGS
 import pathlib
 import csv
 
-import asyncio
 import glob
 from PIL import Image
 import pandas as pd
