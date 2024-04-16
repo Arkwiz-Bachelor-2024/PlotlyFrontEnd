@@ -153,7 +153,7 @@ def update_timer(n):
     [Input("submit-button", "n_clicks")],
     State("latitude-longitude-input", "value"),
 )
-def on_submit(n_clicks, input_value):
+async def on_submit(n_clicks, input_value):
     parameters = load_parameters()
     script_configs = parameters.get("scripts", {})
 
@@ -170,7 +170,11 @@ def on_submit(n_clicks, input_value):
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
-            merge_images_from_array(dictionary_to_array(extract_masks()),"./ImageExtractor/Images/ClassifiedImage.tif")
+            mask_details = extract_masks()
+            merge_images_from_array(
+                dictionary_to_array(mask_details),
+                "./ImageExtractor/Images/ClassifiedImage.tif",
+            )
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
         return "Invalid coordinates format."
