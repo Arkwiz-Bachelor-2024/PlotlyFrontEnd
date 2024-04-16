@@ -173,7 +173,7 @@ def on_submit(n_clicks, input_value):
             mask_details = extract_masks()
             merge_images_from_array(
                 dictionary_to_array(mask_details),
-                "./ImageExtractor/Images/ClassifiedImage.tif",
+                "./ImageExtractor/Images/ClassifiedImage.png",
             )
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
