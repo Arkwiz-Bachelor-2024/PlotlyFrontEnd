@@ -1,4 +1,10 @@
 from dash import html, dcc, Dash, Input, Output, callback, State, MATCH, ALL, no_update
+import sys
+import os
+
+# Imports the root directory to the path in order to import project modules
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
 
 import plotly.graph_objects as go
 import dash
@@ -15,14 +21,17 @@ from PIL.ExifTags import TAGS
 import pathlib
 import csv
 
+import asyncio
 import glob
 from PIL import Image
 import pandas as pd
-import utils.ImageDivider as ImageDivider
-from utils.ImageDivider import split_image, merge_images
+from utils.image_preparation import dictionary_to_array
+from utils.image_divider import split_image, merge_images_from_array
+from mask_extractor import extract_masks
 
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
+mask_details = None
 
 
 def load_parameters():
@@ -161,6 +170,11 @@ async def on_submit(n_clicks, input_value):
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
+            mask_details = extract_masks()
+            merge_images_from_array(
+                dictionary_to_array(mask_details),
+                "./ImageExtractor/Images/ClassifiedImage.tif",
+            )
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
         return "Invalid coordinates format."

@@ -5,6 +5,7 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
+from matplotlib.colors import ListedColormap
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -12,8 +13,8 @@ from tensorflow import keras
 from PIL import Image
 import matplotlib.cm as cm
 
-from generator import extract_predictions
-from metrics import get_class_distribution
+from model.generator import extract_predictions
+from model.metrics import get_class_distribution
 
 # * Pre-determined Colourmap
 # White, Red, Green, Blue, Gray in RGB
@@ -42,12 +43,13 @@ def generate_masks_with_details(images, model_name):
 
     try:
         # Load and predict images
-        model_path = f"./models/{model_name}"
-        model = keras.models.load_model(model_path)
-        masks = extract_predictions(images, model)
+        print("hello")
 
     except Exception as e:
         print(f"An error occured while generating masks: {e}")
+    model_path = f"./model/models/{model_name}"
+    model = keras.models.load_model(model_path)
+    masks = extract_predictions(images, model)
 
     results = []
 
