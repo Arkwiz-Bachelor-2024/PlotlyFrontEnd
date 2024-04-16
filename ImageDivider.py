@@ -64,4 +64,4 @@ def merge_images(tiles_folder, output_image_path, tiles_x, tiles_y, tile_size=(5
     # Save the merged image
     merged_image.save(output_image_path)
 
-merge_images("ImageExtractor\\Images\\Divided", "ImageExtractor\\Images\\OutputFile.png",8,6)
+#merge_images("ImageExtractor\\Images\\Divided", "ImageExtractor\\Images\\OutputFile.png",8,6)

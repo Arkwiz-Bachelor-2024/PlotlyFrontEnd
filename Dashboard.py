@@ -10,6 +10,17 @@ import json
 import subprocess
 from math import cos, pi
 import pyproj
+from PIL import Image
+from PIL.ExifTags import TAGS
+import pathlib
+import csv
+
+import glob
+from PIL import Image
+import pandas as pd
+import ImageDivider
+from ImageDivider import split_image, merge_images
+
 
 PARAMETERS_PATH = 'ImageExtractor\\parameters.json'
 
@@ -76,30 +87,13 @@ app.layout = html.Div(className='main-container', children=[
 )
 def update_image(contents):
     if contents is None:
-        no_image_message = "Please upload the image you wish to classify!"
-        return html.Div(no_image_message,
-                        style={
-                            'color': 'white',
-                            'textAlign': 'center',
-                            'margin': 'auto',
-                            'fontFamily': 'Arial',
-                            'fontWeight': 'bold',
-                            'fontSize': '20px',
-                            'marginTop': '60px'}), html.Div(
-            no_image_message, style={
-                'color': 'white',
-                'textAlign': 'center',
-                'margin': 'auto',
-                'fontFamily': 'Arial',
-                'fontWeight': 'bold',
-                'fontSize': '20px',
-                'marginTop': '60px'})
-
-    content_type, content_string = contents.split(',')
-    decoded = base64.b64decode(content_string)
-    img_src = f'data:image/jpg;base64,{content_string}'
-    image_element = html.Img(src=img_src, style={'maxWidth': '100%', 'maxHeight': '40vh', 'marginLeft': '5px'})
-    return image_element, image_element
+        raise PreventUpdate
+    
+    img = Image.open('ImageExtractor\\Images\\output_image.tif')
+    
+    original_image = html.Img(src=contents, className='image')
+    classified_image = html.Img(src=contents, className='image')
+    return original_image, classified_image
 
 
 @callback(
@@ -133,10 +127,11 @@ def on_submit(n_clicks, input_value):
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
+            ImageDivider.split_image('.\\ImageExtractor\\Images\\output_image.tif', '.\\ImageExtractor\\Images\\Divided')
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
         return "Invalid coordinates format."
-
-
+    
+    
 if __name__ == '__main__':
     app.run_server(debug=True)
