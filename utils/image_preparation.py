@@ -6,6 +6,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 from PIL import Image
 from utils.image_divider import merge_images_from_array
+import tensorflow as tf
+from tensorflow import data as tf_data
+from tensorflow import io as tf_io
+from tensorflow import image as tf_image
 
 
 def load_images_from_folder(folder):
@@ -17,9 +21,11 @@ def load_images_from_folder(folder):
         img_path = os.path.join(folder, filename)
         try:
             with Image.open(img_path) as img:
-                images.append(
-                    img.copy()
-                )  # Use img.copy() if you plan to close the image
+                img = img.copy()
+                img = tf_image.resize(img, (512, 512))
+                img = tf.cast(img, tf.float32) / 255.0
+                img = tf_image.convert_image_dtype(img, "float32")
+                images.append(img)
         except IOError:
             # You can skip files that aren't images
             print(f"Failed to load {filename}")
@@ -30,14 +36,16 @@ def dictionary_to_array(list):
     """
     Extracts the masks from the mask details dictionary.
 
-    
+
     """
     array = []
     for mask in list:
         key = next(iter(mask))
         array.append(mask[key][f"mask_image"])
-        
 
     return array
+
+
 # images = load_images_from_folder(".\\ImageExtractor\\Images\\Divided")
+
 # merge_images_from_array(images,".\\ImageExtractor\\Images\\TestOutput.png")

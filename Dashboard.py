@@ -1,4 +1,3 @@
-from celery import Celery
 from dash import html, dcc, Input, Output, callback, State, MATCH, ALL, no_update, Dash
 import dash
 import sys
