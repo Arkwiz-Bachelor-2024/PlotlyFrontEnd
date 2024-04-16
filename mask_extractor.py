@@ -27,7 +27,7 @@ def extract_masks():
     images = load_images_from_folder(tiles_path)
 
     # Extract masks
-    masks = generate_masks_with_details(images, "base_model.keras")
+    masks = generate_masks_with_details(images, "Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd")
     print("Nå er vi her")
 
     # Dictonary containing the masks and its class distribution

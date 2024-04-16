@@ -73,8 +73,8 @@ def merge_images_from_array(tiles, output_path, tile_size=(512,512)):
 
     merged_image = Image.new('RGB', (8 * tile_size[0], 6 * tile_size[1]))
 
-    if len(tiles) != 6*8:
-        raise ValueError("Inputed images does not satisfy the resolution of 6 * 8 images!")
+    # if len(tiles) != 6*8:
+        # raise ValueError("Inputed images does not satisfy the resolution of 6 * 8 images!")
     
     for tile in range(len(tiles)):
         x = (tile % 6) * 512

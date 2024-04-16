@@ -153,7 +153,7 @@ def update_timer(n):
     [Input("submit-button", "n_clicks")],
     State("latitude-longitude-input", "value"),
 )
-async def on_submit(n_clicks, input_value):
+def on_submit(n_clicks, input_value):
     parameters = load_parameters()
     script_configs = parameters.get("scripts", {})
 

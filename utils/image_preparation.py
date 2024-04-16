@@ -33,9 +33,10 @@ def dictionary_to_array(list):
     
     """
     array = []
-
     for mask in list:
-        array.append(mask["Mask image"])
+        key = next(iter(mask))
+        array.append(mask[key][f"mask_image"])
+        
 
     return array
 # images = load_images_from_folder(".\\ImageExtractor\\Images\\Divided")
