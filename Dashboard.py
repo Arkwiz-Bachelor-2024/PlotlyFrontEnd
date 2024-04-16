@@ -1,4 +1,6 @@
-from dash import html, dcc, Dash, Input, Output, callback, State, MATCH, ALL, no_update
+from celery import Celery
+from dash import html, dcc, Input, Output, callback, State, MATCH, ALL, no_update, Dash
+import dash
 import sys
 import os
 
@@ -7,7 +9,6 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
 import plotly.graph_objects as go
-import dash
 import base64
 import re
 from dash.exceptions import PreventUpdate
@@ -21,7 +22,6 @@ from PIL.ExifTags import TAGS
 import pathlib
 import csv
 
-import asyncio
 import glob
 from PIL import Image
 import pandas as pd
@@ -148,7 +148,7 @@ def update_timer(n):
     return f"Time: {time_elapsed.seconds}"
 
 
-@callback(
+@app.callback(
     Output("checker", "children"),
     [Input("submit-button", "n_clicks")],
     State("latitude-longitude-input", "value"),
@@ -170,8 +170,7 @@ def on_submit(n_clicks, input_value):
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
-            mask_details = extract_masks()
-            merge_images_from_array(dictionary_to_array(mask_details),"./ImageExtractor/Images/ClassifiedImage.tif")
+            merge_images_from_array(dictionary_to_array(extract_masks()),"./ImageExtractor/Images/ClassifiedImage.tif")
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
         return "Invalid coordinates format."

@@ -10,6 +10,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
+from utils.image_preparation import load_images_from_folder
+
 from PIL import Image
 import matplotlib.cm as cm
 
@@ -53,6 +55,7 @@ def generate_masks_with_details(images, model_name):
     
 
     results = []
+    
 
     for i in range(len(masks)):
 
@@ -75,3 +78,5 @@ def generate_masks_with_details(images, model_name):
         )
 
     return results
+
+generate_masks_with_details(load_images_from_folder("ImageExtractor\Images\Divided"),"base_model.keras")
