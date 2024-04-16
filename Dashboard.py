@@ -18,8 +18,8 @@ import csv
 import glob
 from PIL import Image
 import pandas as pd
-import ImageDivider
-from ImageDivider import split_image, merge_images
+import utils.ImageDivider as ImageDivider
+from utils.ImageDivider import split_image, merge_images
 
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
@@ -139,12 +139,12 @@ def update_timer(n):
     return f"Time: {time_elapsed.seconds}"
 
 
-@callback(
+@app.callback(
     Output("checker", "children"),
     [Input("submit-button", "n_clicks")],
     State("latitude-longitude-input", "value"),
 )
-def on_submit(n_clicks, input_value):
+async def on_submit(n_clicks, input_value):
     parameters = load_parameters()
     script_configs = parameters.get("scripts", {})
 
@@ -161,10 +161,6 @@ def on_submit(n_clicks, input_value):
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
-            ImageDivider.split_image(
-                ".\\ImageExtractor\\Images\\output_image.tif",
-                ".\\ImageExtractor\\Images\\Divided",
-            )
             return f"Coordinates: {lat}, {lon}"
     except ValueError:
         return "Invalid coordinates format."
