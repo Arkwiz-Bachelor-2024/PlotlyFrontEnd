@@ -27,7 +27,11 @@ import pandas as pd
 from utils.image_preparation import dictionary_to_array
 from utils.image_divider import split_image, merge_images_from_array
 from mask_extractor import extract_masks
+import plotly.express as px
+import numpy as np
 
+
+last_modified_time = 0
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
 mask_details = None
@@ -125,19 +129,58 @@ app.layout = html.Div(
 )
 
 
-@callback(
-    [Output("original-image", "children"), Output("classified-image", "children")],
-    [Input("upload-image-button", "contents")],
+@app.callback(
+    [Output("original-image", "children"), 
+     Output("classified-image", "children")],
+    [Input("submit-button", "n_clicks")]
 )
-def update_image(contents):
-    if contents is None:
+def update_image(n_clicks):
+    global last_modified_time
+
+    on_submit
+
+    if n_clicks is None or n_clicks == 0:
         raise PreventUpdate
 
-    img = Image.open("ImageExtractor\\Images\\output_image.tif")
+    img_path_original = "ImageExtractor\\Images\\output_image.tif"
+    img_path_classified = "ImageExtractor\\Images\\ClassifiedImage.png"
 
-    original_image = html.Img(src=contents, className="image")
-    classified_image = html.Img(src=contents, className="image")
-    return original_image, classified_image
+    if not os.path.exists(img_path_original) or not os.path.exists(img_path_classified):
+        raise PreventUpdate
+    
+    current_modified_time = os.path.getmtime(img_path_classified)
+    
+    if current_modified_time <= last_modified_time:
+        raise PreventUpdate
+    
+    last_modified_time = current_modified_time
+
+    img_original = np.array(Image.open(img_path_original))
+    img_classified = np.array(Image.open(img_path_classified))
+    
+    fig_original = px.imshow(img_original)
+    fig_original.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        coloraxis_showscale=False,
+    )
+    fig_original.update_layout(coloraxis_showscale=False)
+    fig_original.update_xaxes(showticklabels=False)
+    fig_original.update_yaxes(showticklabels=False)
+
+    fig_classified = px.imshow(img_classified)
+    fig_classified.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        coloraxis_showscale=False,
+    )
+    fig_classified.update_layout(coloraxis_showscale=False)
+    fig_classified.update_xaxes(showticklabels=False)
+    fig_classified.update_yaxes(showticklabels=False)
+
+    return dcc.Graph(figure=fig_original), dcc.Graph(figure=fig_classified)
 
 
 @callback(Output("timer", "children"), [Input("update-time", "n_intervals")])
