@@ -11,36 +11,32 @@ import tensorflow as tf
 from tensorflow import data as tf_data
 from tensorflow import io as tf_io
 from tensorflow import image as tf_image
+from tensorflow import cast, float32
+import re
+
+def numerical_sort(filename):
+    numbers = re.compile(r'(\d+)')
+    parts = numbers.split(filename)
+    parts[1::2] = map(int, parts[1::2])
+    return parts
+
 
 
 def load_images_from_folder(folder):
     """
-    Loads images from a directory into a list of PIL Image objects.
+    Loads images from a directory into a list of PIL Image objects, resizing and converting them appropriately.
     """
-
-    # images = __sort_directory__(folder)
-    # for i in range(len(images)):
-
-    #     img = images[i]
-    #     img = tf_image.resize(img, (512, 512))
-    #     img = tf.cast(img, tf.float32) / 255.0
-    #     img = tf_image.convert_image_dtype(img, "float32")
-    #     images.append(img)
-
-    # return images
-
     images = []
-    for filename in os.listdir(folder):
-        img_path = os.path.join(folder, filename)
+    img_paths = __sort_directory__(folder)
+    for filename in img_paths:
         try:
-            with Image.open(img_path) as img:
-                img = img.copy()
-                img = tf_image.resize(img, (512, 512))
-                img = tf.cast(img, tf.float32) / 255.0
-                img = tf_image.convert_image_dtype(img, "float32")
+            with Image.open(filename) as img:
+                img = img.convert('RGB')  # Convert to RGB if not already
+                img = tf_image.resize(img, (512, 512))  # Resizing using TensorFlow
+                img = cast(img, float32) / 255.0  # Normalize the image
+                img = Image.fromarray(tf_image.convert_image_dtype(img, tf.uint8).numpy())  # Convert back to PIL Image
                 images.append(img)
         except IOError:
-            # You can skip files that aren't images
             print(f"Failed to load {filename}")
     return images
 
