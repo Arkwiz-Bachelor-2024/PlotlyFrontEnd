@@ -2,18 +2,9 @@ from PIL import Image
 import numpy as np
 import math
 import os
-import shutil
 
-def clear_folder(folder):
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)  # This will delete a file or a symbolic link
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)  # This will delete a directory and all its contents
-        except Exception as e:
-            print(f"Failed to delete {file_path}. Reason: {e}")
+from utils.image_preparation import load_images_from_folder,__sort_directory__
+
 
 def split_image(image_path, output_dir, tile_size=(512, 512)):
     """
@@ -22,13 +13,11 @@ def split_image(image_path, output_dir, tile_size=(512, 512)):
     """
     # Load the image
     image = Image.open(image_path)
-    clear_folder(output_dir)
-    
 
     # Calculate the number of tiles in each dimension
     img_width, img_height = image.size
-    tiles_x = 8  
-    tiles_y = 6 
+    tiles_x = img_width // tile_size[0]  # Use floor division to round down
+    tiles_y = img_height // tile_size[1]  # Use floor division to round down
 
     # Create the output directory if it doesn't exist
     if not os.path.exists(output_dir):
@@ -97,3 +86,6 @@ def merge_images_from_array(tiles, output_path, grid_size=(8,6), tile_size=(512,
         merged_image.paste(tile, (x, y))
     merged_image.save(output_path)
     print("Image saved to output path!")
+
+# __sort_directory__("./ImageExtractor/Images/Divided")
+merge_images_from_array(load_images_from_folder("./ImageExtractor/Images/Divided"),"./ImageExtractor/Images/MergedImage.png")
