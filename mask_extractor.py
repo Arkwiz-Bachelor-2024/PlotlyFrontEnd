@@ -28,7 +28,7 @@ def extract_masks():
 
     # Extract masks
     masks = generate_masks_with_details(
-        images, "Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd" #model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
+        images, "Deeplabv3Plus_50e_32b_Centropy_SGD_warmup+DO_mild+DA_mild" #model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
     )  # Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
     print("Model loaded.")
 
