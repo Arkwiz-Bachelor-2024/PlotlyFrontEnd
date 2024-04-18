@@ -31,9 +31,6 @@ import plotly.express as px
 import numpy as np
 import time
 
-
-last_modified_time = 0
-
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
 mask_details = None
 
@@ -72,7 +69,7 @@ app.layout = html.Div(
                 html.Div(
                     className="info-container",
                     children=[
-                        #html.Div(id="timer", children="Time: 0"),
+                        html.Div(id="timer", children="Time: 0"),
                     ],
                 ),
                 dcc.Interval(id="update-time", interval=1000, n_intervals=0),
@@ -104,6 +101,7 @@ app.layout = html.Div(
                     ],
                     className="graph-container",
                 ),
+                html.Div(id='update-trigger', style={'display': 'none'}),
             ],
         ),
     ],
@@ -147,14 +145,10 @@ def update_pie_chart(n_clicks, src_classified):
 @app.callback(
     [Output("original-image", "children"), 
      Output("classified-image", "children")],
-    [Input("submit-button", "n_clicks")]
+    [Input("update-trigger", "children")]
 )
-def update_image(n_clicks):
-    #CHANGE THIS
-    time.sleep(35)
-    global last_modified_time
-
-    if n_clicks is None or n_clicks == 0:
+def update_image(trigger_value):
+    if not trigger_value:
         raise PreventUpdate
 
     img_path_original = "ImageExtractor\\Images\\output_image.tif"
@@ -162,13 +156,6 @@ def update_image(n_clicks):
 
     if not os.path.exists(img_path_original) or not os.path.exists(img_path_classified):
         raise PreventUpdate
-    
-    current_modified_time = os.path.getmtime(img_path_classified)
-    
-    if current_modified_time <= last_modified_time:
-        raise PreventUpdate
-    
-    last_modified_time = current_modified_time
 
     img_original = np.array(Image.open(img_path_original))
     img_classified = np.array(Image.open(img_path_classified))
@@ -197,8 +184,8 @@ def update_image(n_clicks):
 
     return dcc.Graph(figure=fig_original), dcc.Graph(figure=fig_classified)
 
-
-@callback(Output("timer", "children"), [Input("update-time", "n_intervals")])
+@callback(Output("timer", "children"), 
+          [Input("update-time", "n_intervals")])
 def update_timer(n):
     global start_time
     time_elapsed = datetime.now() - start_time
@@ -206,6 +193,7 @@ def update_timer(n):
 
 
 @app.callback(
+    Output("update-trigger", "children"),    
     Output("checker", "children"),
     [Input("submit-button", "n_clicks")],
     State("latitude-longitude-input", "value"),
@@ -232,7 +220,7 @@ def on_submit(n_clicks, input_value):
                 dictionary_to_array(mask_details),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
-            return f"Coordinates: {lat}, {lon}"
+            return f"Coordinates: {lat}, {lon}", str(datetime.now())
     except ValueError:
         return "Invalid coordinates format."
 
