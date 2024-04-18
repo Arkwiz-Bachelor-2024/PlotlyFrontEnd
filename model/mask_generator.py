@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 
 # Imports the root directory to the path in order to import project modules
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -63,7 +64,7 @@ def generate_masks_with_details(images, model_name):
 
         # Convert mask labels to image
         # print(type(masks[i]))
-        mapped_data = cmap(masks[i])  # Normalize the data
+        mapped_data = cmap(masks[i])
         image_data = (mapped_data[:, :, :3] * 255).astype(np.uint8)
 
         # Create the image

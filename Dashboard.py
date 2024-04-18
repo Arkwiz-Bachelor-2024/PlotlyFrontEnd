@@ -29,6 +29,7 @@ from utils.image_divider import split_image, merge_images_from_array
 from mask_extractor import extract_masks
 import plotly.express as px
 import numpy as np
+import time
 
 
 last_modified_time = 0
@@ -52,24 +53,6 @@ def save_parameters(parameters):
 
 app = Dash(__name__, suppress_callback_exceptions=True, assets_folder="assets")
 
-labels = ["TREE", "WATER", "BUILDING", "GRASS"]
-values = [250, 300, 150, 200]
-
-fig = go.Figure(
-    data=[
-        go.Pie(
-            labels=labels,
-            values=values,
-            marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24"]),
-            textinfo="label+percent",
-            insidetextfont=dict(color="white", size=10),
-            outsidetextfont=dict(color="white", size=10),
-        )
-    ]
-)
-fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-
-
 start_time = datetime.now()
 
 app.layout = html.Div(
@@ -89,9 +72,7 @@ app.layout = html.Div(
                 html.Div(
                     className="info-container",
                     children=[
-                        html.Div(id="image-size", children="Size: "),
-                        html.Div(id="accuracy", children="Accuracy: "),
-                        html.Div(id="timer", children="Time: 0"),
+                        #html.Div(id="timer", children="Time: 0"),
                     ],
                 ),
                 dcc.Interval(id="update-time", interval=1000, n_intervals=0),
@@ -119,7 +100,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        dcc.Graph(id="classification-graph", figure=fig),
+                        dcc.Graph(id="classification-graph"),
                     ],
                     className="graph-container",
                 ),
@@ -128,6 +109,40 @@ app.layout = html.Div(
     ],
 )
 
+@app.callback(
+    Output("classification-graph", "figure"),
+    [Input("submit-button", "n_clicks")],
+)
+def update_pie_chart(n_clicks, src_classified):
+    if n_clicks is None or n_clicks == 0:
+        raise PreventUpdate
+    
+    try:
+        img_classified = np.array(Image.open(src_classified))
+
+    except:
+        raise PreventUpdate
+    
+    try:
+        distribution = get_class_distribution(img_classified)
+    except:
+        raise PreventUpdate
+    
+    labels = list(distribution.keys())
+    values = list(distribution.values())
+
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=labels,
+                values=values,
+                marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24"]),
+                textinfo="label+percent",
+                insidetextfont=dict(color="white", size=10),
+                outsidetextfont=dict(color="white", size=10), 
+                )])
+    return fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+
 
 @app.callback(
     [Output("original-image", "children"), 
@@ -135,9 +150,9 @@ app.layout = html.Div(
     [Input("submit-button", "n_clicks")]
 )
 def update_image(n_clicks):
+    #CHANGE THIS
+    time.sleep(35)
     global last_modified_time
-
-    on_submit
 
     if n_clicks is None or n_clicks == 0:
         raise PreventUpdate
@@ -205,7 +220,7 @@ def on_submit(n_clicks, input_value):
     try:
         lat, lon = map(float, input_value.split(","))
         if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-            return "Latitude or longitude is out of range."
+            return "Latitude or longitude is out of range.", PreventUpdate
 
         else:
             parameters["center_lat"] = lat
