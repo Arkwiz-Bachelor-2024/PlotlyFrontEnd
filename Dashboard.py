@@ -217,7 +217,7 @@ def on_submit(n_clicks, input_value):
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
             mask_details = extract_masks()
             merge_images_from_array(
-                dictionary_to_array(mask_details),
+                dictionary_to_array(mask_details,"mask_image"),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
             return f"Coordinates: {lat}, {lon}", str(datetime.now())
