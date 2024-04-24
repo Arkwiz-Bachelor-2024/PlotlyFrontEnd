@@ -48,15 +48,13 @@ def generate_masks_with_details(images, model_name):
         # Load and predict images
         print("hello")
         model_path = f"model/models/{model_name}"
-        model = keras.models.load_model(model_path)
+        model = keras.models.load_model(model_path, compile=False)
         masks = extract_predictions(images, model)
 
     except Exception as e:
         print(f"An error occured while generating masks: {e}")
-    
 
     results = []
-    
 
     for i in range(len(masks)):
 

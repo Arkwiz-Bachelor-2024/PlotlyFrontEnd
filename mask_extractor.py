@@ -28,7 +28,8 @@ def extract_masks():
 
     # Extract masks
     masks = generate_masks_with_details(
-        images, "base_model.keras" #model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
+        images,
+        "Deeplabv3Plus_OS8_50e_32b_Poly_SGD_wBCE_Tvernsky_milestones_warmup+DA_mid",  # model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
     )  # Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
     print("Model loaded.")
 

@@ -1,6 +1,6 @@
 {
-    "center_lat": 62.472341748176866,
-    "center_lon": 6.23548728188999,
+    "center_lat": 62.472261920905275,
+    "center_lon": 6.169563353459216,
     "output_location": "ImageExtractor\\Images",
     "scripts": {
         "ImageExtractor/Download_Aerial_1km.py": {
