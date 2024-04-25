@@ -13,6 +13,7 @@ from tensorflow import io as tf_io
 from tensorflow import image as tf_image
 from tensorflow import cast, float32
 import re
+import numpy as np
 
 
 def load_images_from_folder(folder):
@@ -68,6 +69,30 @@ def dictionary_to_array(dictionary, dictkey):
 
     return array
 
+def prepare_distribution(distribution):
+    """
+    Prepare the class distributions for further usage. Summerize all the distributions into an array consisting
+    of the general class distributions over all the distributions.
+    
+    :param distribution: array of dictionaries with the class distributions 
+    """
+
+    # Prepare an empty array for the distributions
+    sum_classes = np.zeros(5)
+
+    for distributions in distribution:
+        for cls, percent in distributions.items():
+            sum_classes[cls] += percent
+
+    # Checks if the sum is exsisting, to avoid division by zero.
+    total = np.sum(sum_classes)
+    if total > 0:
+        # Convert the sum of the classes to percentages
+        percent_classes = (sum_classes / total) * 100
+    else:
+        percent_classes = np.zeros(5)  
+
+    return percent_classes
 
         
 

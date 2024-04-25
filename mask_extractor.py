@@ -11,7 +11,7 @@ from model.mask_generator import generate_masks_with_details
 
 
 #The machine learning model that shall preform the classification.
-MACHINE_LEARNING_MODEL = "Deeplabv3Plus_50e_32b_Centropy_SGD_warmup+DO_mild+DA_mild" # Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd, model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
+MACHINE_LEARNING_MODEL = "base_model.keras" # Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd, model\models\Deeplabv3Plus_100e_4b_Centropy_adaptive_sgd
 
 
 
@@ -35,7 +35,7 @@ def extract_masks():
         images,
         MACHINE_LEARNING_MODEL,
     )  
-    print("Model loaded.")
+    print("Mask predicted.")
 
     # Dictonary containing the masks and its class distribution
     return masks

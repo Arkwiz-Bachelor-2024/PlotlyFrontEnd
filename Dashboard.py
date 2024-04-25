@@ -24,7 +24,7 @@ import csv
 import glob
 from PIL import Image
 import pandas as pd
-from utils.image_preparation import dictionary_to_array
+from utils.image_preparation import dictionary_to_array, prepare_distribution
 from utils.image_divider import split_image, merge_images_from_array
 from mask_extractor import extract_masks
 import plotly.express as px
@@ -216,13 +216,20 @@ def on_submit(n_clicks, input_value):
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
             mask_details = extract_masks()
+
+            # Example usage of the distributions
+            # Prints out and array of 4 elements consisting of the class distribution over the whole image in percentages
+            # 1st is background, 2nd is building, 3rd is trees, 4th is water and 5th is road
+            print(prepare_distribution(dictionary_to_array(mask_details, "class_distribution")))
+
+
             merge_images_from_array(
                 dictionary_to_array(mask_details,"mask_image"),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
             return f"Coordinates: {lat}, {lon}", str(datetime.now())
     except ValueError:
-        return "Invalid coordinates format."
+        return f"Invalid coordinates format.{ValueError}"
 
 
 if __name__ == "__main__":
