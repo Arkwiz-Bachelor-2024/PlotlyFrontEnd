@@ -21,6 +21,8 @@ from PIL.ExifTags import TAGS
 import pathlib
 import csv
 
+from model.metrics import get_class_distribution
+
 import glob
 from PIL import Image
 import pandas as pd
@@ -69,7 +71,7 @@ app.layout = html.Div(
                 html.Div(
                     className="info-container",
                     children=[
-                        html.Div(id="timer", children="Time: 0"),
+                        #html.Div(id="timer", children="Time: 0"),
                     ],
                 ),
                 dcc.Interval(id="update-time", interval=1000, n_intervals=0),
@@ -97,7 +99,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        dcc.Graph(id="classification-graph"),
+                        dcc.Graph(id="classification-graph", style={'display': 'none'}),
                     ],
                     className="graph-container",
                 ),
@@ -107,40 +109,45 @@ app.layout = html.Div(
     ],
 )
 
+
 @app.callback(
     Output("classification-graph", "figure"),
-    [Input("submit-button", "n_clicks")],
+    Output("classification-graph", "style"),
+    [Input("update-trigger", "children")],
 )
-def update_pie_chart(n_clicks, src_classified):
-    if n_clicks is None or n_clicks == 0:
+def update_pie_chart(class_distribution):
+    if not class_distribution:
         raise PreventUpdate
-    
-    try:
-        img_classified = np.array(Image.open(src_classified))
 
-    except:
-        raise PreventUpdate
-    
-    try:
-        distribution = get_class_distribution(img_classified)
-    except:
-        raise PreventUpdate
-    
-    labels = list(distribution.keys())
-    values = list(distribution.values())
-
+    parameters = load_parameters()
+    class_distribution = parameters.get("class_distribution")
+    labels = ["Background", "Building", "Trees", "Water", "Road"]
     fig = go.Figure(
-        data=[
-            go.Pie(
-                labels=labels,
-                values=values,
-                marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24"]),
-                textinfo="label+percent",
-                insidetextfont=dict(color="white", size=10),
-                outsidetextfont=dict(color="white", size=10), 
-                )])
-    return fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        go.Pie(
+            labels=labels,
+            values=class_distribution,
+            hole=0.3,
+            textposition="inside",
+            insidetextorientation="horizontal",
+            marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24", "#020B0D"]),
+            textinfo="label + percent",
+        )
+    )
+    fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        height=300,
+        width=300,
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=False)
+    )
 
+    return fig, {'display': 'block'}
+
+
+    
 
 @app.callback(
     [Output("original-image", "children"), 
@@ -220,14 +227,15 @@ def on_submit(n_clicks, input_value):
             # Example usage of the distributions
             # Prints out and array of 4 elements consisting of the class distribution over the whole image in percentages
             # 1st is background, 2nd is building, 3rd is trees, 4th is water and 5th is road
-            print(prepare_distribution(dictionary_to_array(mask_details, "class_distribution")))
+            class_distribution = prepare_distribution(dictionary_to_array(mask_details, "class_distribution"))
+            print(class_distribution)
 
 
             merge_images_from_array(
                 dictionary_to_array(mask_details,"mask_image"),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
-            return f"Coordinates: {lat}, {lon}", str(datetime.now())
+            return f"Coordinates: {lat}, {lon} with distribution {class_distribution}", str(datetime.now())
     except ValueError:
         return f"Invalid coordinates format.{ValueError}"
 
