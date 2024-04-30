@@ -1,59 +1,34 @@
-from dash import html, dcc, Input, Output, callback, State, MATCH, ALL, no_update, Dash
-import dash
+from dash import html, dcc, Input, Output, callback, State, no_update, Dash
 import sys
 import os
-
-# Imports the root directory to the path in order to import project modules
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, project_root)
-
 import plotly.graph_objects as go
-import base64
-import re
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 import json
 import subprocess
-from math import cos, pi
-import pyproj
 from PIL import Image
 from PIL.ExifTags import TAGS
-import pathlib
-import csv
-
-from model.metrics import get_class_distribution
-
-import glob
 from PIL import Image
-import pandas as pd
 from utils.image_preparation import dictionary_to_array, prepare_distribution
-from utils.image_divider import split_image, merge_images_from_array
+from utils.image_divider import merge_images_from_array
 from mask_extractor import extract_masks
 import plotly.express as px
 import numpy as np
-import time
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
+
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
-mask_details = None
-
-
-def load_parameters():
-    try:
-        with open(PARAMETERS_PATH, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-
-
-def save_parameters(parameters):
-    with open(PARAMETERS_PATH, "w") as f:
-        json.dump(parameters, f, indent=4)
 
 
 app = Dash(__name__, suppress_callback_exceptions=True, assets_folder="assets")
+app.title = "ARKWIZ Image Classifier"
 
 start_time = datetime.now()
 
+
+# Layout of the dashboard
 app.layout = html.Div(
     className="main-container",
     children=[
@@ -109,6 +84,24 @@ app.layout = html.Div(
     ],
 )
 
+def load_parameters():
+    """
+    Load the parameters from a JSON file.
+    """
+    try:
+        with open(PARAMETERS_PATH, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+def save_parameters(parameters):
+    """
+    Save the parameters to a JSON file.
+    """
+    with open(PARAMETERS_PATH, "w") as f:
+        json.dump(parameters, f, indent=4)
+
 
 @app.callback(
     Output("classification-graph", "figure"),
@@ -116,14 +109,20 @@ app.layout = html.Div(
     [Input("update-trigger", "children")],
 )
 def update_pie_chart(class_distribution):
+    """
+    This function is called when the image is downloaded and is done classifying.
+    It will display the classification distribution on the dashboard as a pie chart.
+    """
     if not class_distribution:
         raise PreventUpdate
 
     try:
+        # Read the class distribution from the file
         with open('class_distribution.txt', 'r') as f:
             distribution_line = f.readline()
             class_distribution = list(map(float, distribution_line.strip('[]').split()))
     except FileNotFoundError as e:
+        # If the file is not found, raise an error
         print(f"Error reading from class_distribution.txt: {e}")
         raise PreventUpdate
     
@@ -158,17 +157,20 @@ def update_pie_chart(class_distribution):
     return fig, {'display': 'block'}
 
 
-    
-
 @app.callback(
     [Output("original-image", "children"), 
      Output("classified-image", "children")],
     [Input("update-trigger", "children")]
 )
 def update_image(trigger_value):
+    """
+    This function is called when the image is downloaded and is done classifying.
+    It will display the original and classified images on the dashboard.
+    """
     if not trigger_value:
         raise PreventUpdate
-
+    
+    # Load the images
     img_path_original = "ImageExtractor\\Images\\output_image.tif"
     img_path_classified = "ImageExtractor\\Images\\ClassifiedImage.png"
 
@@ -217,18 +219,27 @@ def update_timer(n):
     State("latitude-longitude-input", "value"),
 )
 def on_submit(n_clicks, input_value):
+    """
+    This function is called when the submit button is clicked.
+    It will classify the image and return the classification results.
+    """
     parameters = load_parameters()
-    script_configs = parameters.get("scripts", {})
 
     if n_clicks == 0:
         raise PreventUpdate
 
     try:
         lat, lon = map(float, input_value.split(","))
+        # Check if the coordinates are valid
         if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-            return "Latitude or longitude is out of range.", PreventUpdate
+            # If the coordinates are invalid, return an error message
+            return no_update, "Invalid coordinates."
+        
 
         else:
+            # If the coordinates are valid, classify the image
+            message = "Classifying for coordinates: {}, {}".format(lat, lon)
+
             parameters["center_lat"] = lat
             parameters["center_lon"] = lon
             save_parameters(parameters)
@@ -250,9 +261,9 @@ def on_submit(n_clicks, input_value):
                 dictionary_to_array(mask_details,"mask_image"),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
-            return f"Coordinates: {lat}, {lon} with distribution {class_distribution}", str(datetime.now())
+            return str(datetime.now()), message
     except ValueError:
-        return f"Invalid coordinates format.{ValueError}"
+        return no_update, f"Invalid coordinates format."
 
 
 if __name__ == "__main__":
