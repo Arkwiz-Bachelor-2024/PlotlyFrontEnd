@@ -119,9 +119,18 @@ def update_pie_chart(class_distribution):
     if not class_distribution:
         raise PreventUpdate
 
-    parameters = load_parameters()
-    class_distribution = parameters.get("class_distribution")
+    try:
+        with open('class_distribution.txt', 'r') as f:
+            distribution_line = f.readline()
+            class_distribution = list(map(float, distribution_line.strip('[]').split()))
+    except FileNotFoundError as e:
+        print(f"Error reading from class_distribution.txt: {e}")
+        raise PreventUpdate
+    
     labels = ["Background", "Building", "Trees", "Water", "Road"]
+    colors=["#24AECB", "#187588", "#0F4A56", "#061F24", "#020B0D"]
+    text_colors = ['white' if value < 5 else 'black' for value in class_distribution]
+
     fig = go.Figure(
         go.Pie(
             labels=labels,
@@ -129,8 +138,10 @@ def update_pie_chart(class_distribution):
             hole=0.3,
             textposition="inside",
             insidetextorientation="horizontal",
-            marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24", "#020B0D"]),
+            marker=dict(colors=colors, line=dict(color='white', width=2)),
             textinfo="label + percent",
+            outsidetextfont=dict(color='black', size=12),
+            insidetextfont=dict(color=text_colors, size=12),
         )
     )
     fig.update_layout(
@@ -228,6 +239,10 @@ def on_submit(n_clicks, input_value):
             # Prints out and array of 4 elements consisting of the class distribution over the whole image in percentages
             # 1st is background, 2nd is building, 3rd is trees, 4th is water and 5th is road
             class_distribution = prepare_distribution(dictionary_to_array(mask_details, "class_distribution"))
+
+            with open('class_distribution.txt', 'w') as f:
+                f.write(str(class_distribution))
+
             print(class_distribution)
 
 
