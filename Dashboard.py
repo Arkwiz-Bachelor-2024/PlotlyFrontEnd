@@ -32,6 +32,11 @@ start_time = datetime.now()
 app.layout = html.Div(
     className="main-container",
     children=[
+        dcc.ConfirmDialog(
+            id='download-start-dialog',
+            message='Classification started. Please wait...',
+            displayed=False
+        ),
         # Left Container
         html.Div(
             className="left-container",
@@ -128,7 +133,7 @@ def update_pie_chart(class_distribution):
     
     labels = ["Background", "Building", "Trees", "Water", "Road"]
     colors=["#24AECB", "#187588", "#0F4A56", "#061F24", "#020B0D"]
-    text_colors = ['white' if value < 5 else 'black' for value in class_distribution]
+    text_colors = ['white']
 
     fig = go.Figure(
         go.Pie(
@@ -238,7 +243,7 @@ def on_submit(n_clicks, input_value):
 
         else:
             # If the coordinates are valid, classify the image
-            message = "Classifying for coordinates: {}, {}".format(lat, lon)
+            message = "Classified for coordinates: {}, {}".format(lat, lon)
 
             parameters["center_lat"] = lat
             parameters["center_lon"] = lon
@@ -264,6 +269,26 @@ def on_submit(n_clicks, input_value):
             return str(datetime.now()), message
     except ValueError:
         return no_update, f"Invalid coordinates format."
+
+@app.callback(
+    Output("download-start-dialog", "displayed"),
+    [Input("submit-button", "n_clicks")],
+    State("latitude-longitude-input", "value"),
+)
+def handle_submit(n_clicks, input_value):
+    if n_clicks == 0:
+        raise PreventUpdate
+    
+    try:
+        lat, lon = map(float, input_value.split(","))
+        # Check if the coordinates are valid
+        if (-90 <= lat <= 90 and -180 <= lon <= 180):
+            # If the coordinates are invalid, return an error message
+            return True
+    except ValueError:
+        pass
+    return False
+
 
 
 if __name__ == "__main__":
