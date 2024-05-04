@@ -1,93 +1,22 @@
-from dash import html, dcc, Input, Output, callback, State, no_update, Dash
-import sys
-import os
-import plotly.graph_objects as go
+from dash import callback, Output, Input, State, no_update, dcc
 from dash.exceptions import PreventUpdate
 from datetime import datetime
-import json
 import subprocess
-from PIL import Image
-from PIL.ExifTags import TAGS
-from PIL import Image
-from utils.image_preparation import dictionary_to_array, prepare_distribution
-from utils.image_divider import merge_images_from_array
-from mask_extractor import extract_masks
+import os
+import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
+from PIL import Image
+import json
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, project_root)
+from app import app
+from utils.image_preparation import prepare_distribution, dictionary_to_array
+from utils.image_divider import merge_images_from_array
+from mask_extractor import extract_masks
 
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
 
-
-app = Dash(__name__, suppress_callback_exceptions=True, assets_folder="assets")
-app.title = "ARKWIZ Image Classifier"
-
-start_time = datetime.now()
-
-
-# Layout of the dashboard
-app.layout = html.Div(
-    className="main-container",
-    children=[
-        dcc.ConfirmDialog(
-            id='download-start-dialog',
-            message='Classification started. Please wait...',
-            displayed=False
-        ),
-        # Left Container
-        html.Div(
-            className="left-container",
-            children=[
-                html.Div(
-                    className="images-container",
-                    children=[
-                        html.Div(id="original-image", className="image"),
-                        html.Div(id="classified-image", className="image"),
-                    ],
-                ),
-                html.Div(
-                    className="info-container",
-                    children=[
-                        #html.Div(id="timer", children="Time: 0"),
-                    ],
-                ),
-                dcc.Interval(id="update-time", interval=1000, n_intervals=0),
-            ],
-        ),
-        # Right Container
-        html.Div(
-            className="right-container",
-            children=[
-                html.Img(
-                    src=app.get_asset_url("images\Arkwiz_Logo.png"), className="logo"
-                ),
-                dcc.Input(
-                    id="latitude-longitude-input",
-                    type="text",
-                    placeholder="Latitude, Longitude",
-                    className="lat-long-input",
-                ),
-                html.Div(id="checker", className="checker"),
-                html.Button(
-                    "Classify",
-                    id="submit-button",
-                    className="classify-button",
-                    n_clicks=0,
-                ),
-                html.Div(
-                    [
-                        dcc.Graph(id="classification-graph", style={'display': 'none'}),
-                    ],
-                    className="graph-container",
-                ),
-                html.Div(id='update-trigger', style={'display': 'none'}),
-            ],
-        ),
-    ],
-)
 
 def load_parameters():
     """
@@ -107,7 +36,6 @@ def save_parameters(parameters):
     with open(PARAMETERS_PATH, "w") as f:
         json.dump(parameters, f, indent=4)
 
-
 @app.callback(
     Output("classification-graph", "figure"),
     Output("classification-graph", "style"),
@@ -118,6 +46,7 @@ def update_pie_chart(class_distribution):
     This function is called when the image is downloaded and is done classifying.
     It will display the classification distribution on the dashboard as a pie chart.
     """
+
     if not class_distribution:
         raise PreventUpdate
 
@@ -209,6 +138,7 @@ def update_image(trigger_value):
 
     return dcc.Graph(figure=fig_original), dcc.Graph(figure=fig_classified)
 
+
 @callback(Output("timer", "children"), 
           [Input("update-time", "n_intervals")])
 def update_timer(n):
@@ -269,6 +199,9 @@ def on_submit(n_clicks, input_value):
             return str(datetime.now()), message
     except ValueError:
         return no_update, f"Invalid coordinates format."
+    
+    
+    
 
 @app.callback(
     Output("download-start-dialog", "displayed"),
@@ -287,9 +220,4 @@ def handle_submit(n_clicks, input_value):
             return True
     except ValueError:
         pass
-    return False
-
-
-
-if __name__ == "__main__":
-    app.run_server(debug=True)
+    return False    
