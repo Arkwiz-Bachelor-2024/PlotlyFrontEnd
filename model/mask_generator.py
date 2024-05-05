@@ -46,7 +46,7 @@ def generate_masks_with_details(images, model_name):
 
     try:
         # Load and predict images
-        print("hello")
+        print(f"Loading model:{model_name}, and starting to predict masks")
         model_path = f"model/models/{model_name}"
         model = keras.models.load_model(model_path, compile=False)
         masks = extract_predictions(images, model)
@@ -72,7 +72,7 @@ def generate_masks_with_details(images, model_name):
             {
                 i: {
                     "mask_image": mask_img,
-                    "Class Distribution": class_distribution,
+                    "class_distribution": class_distribution,
                 }
             }
         )

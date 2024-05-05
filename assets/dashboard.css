@@ -128,3 +128,15 @@ button:active {
     font-weight: bold;
     margin-bottom: 5px;
 }
+
+.classification-graph {
+    width: 30px;
+}
+
+.graph-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60%;
+    margin-top: 0px;
+}

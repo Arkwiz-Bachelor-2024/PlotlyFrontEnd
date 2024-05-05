@@ -13,18 +13,14 @@ from tensorflow import io as tf_io
 from tensorflow import image as tf_image
 from tensorflow import cast, float32
 import re
-
-def numerical_sort(filename):
-    numbers = re.compile(r'(\d+)')
-    parts = numbers.split(filename)
-    parts[1::2] = map(int, parts[1::2])
-    return parts
-
+import numpy as np
 
 
 def load_images_from_folder(folder):
     """
     Loads images from a directory into a list of PIL Image objects, resizing and converting them appropriately.
+
+    :param folder: the folder where the images are located
     """
     images = []
     img_paths = __sort_directory__(folder)
@@ -46,6 +42,7 @@ def __sort_directory__(input_dir):
     """
     Extracts files from a directory into a naturally sorted array.
 
+    :param input_dir: the directory where content shall be sorted.
     """
 
     input_files = natsorted(
@@ -55,18 +52,49 @@ def __sort_directory__(input_dir):
     return input_files
 
 
-def dictionary_to_array(list):
+def dictionary_to_array(dictionary, dictkey):
     """
-    Extracts the masks from the mask details dictionary.
+    Extractracts information from a dictionary.
 
+    :param dictionary: The dictionary which information shall be retrieved from.
+    :param dictkey: The key of which information shall be retrieved.
+
+    :returns: Array with the objects specified in the dictionary.
 
     """
     array = []
-    for mask in list:
+    for mask in dictionary:
         key = next(iter(mask))
-        array.append(mask[key][f"mask_image"])
+        array.append(mask[key][dictkey])
 
     return array
+
+def prepare_distribution(distribution):
+    """
+    Prepare the class distributions for further usage. Summerize all the distributions into an array consisting
+    of the general class distributions over all the distributions.
+    
+    :param distribution: array of dictionaries with the class distributions 
+    """
+
+    # Prepare an empty array for the distributions
+    sum_classes = np.zeros(5)
+
+    for distributions in distribution:
+        for cls, percent in distributions.items():
+            sum_classes[cls] += percent
+
+    # Checks if the sum is exsisting, to avoid division by zero.
+    total = np.sum(sum_classes)
+    if total > 0:
+        # Convert the sum of the classes to percentages
+        percent_classes = (sum_classes / total) * 100
+    else:
+        percent_classes = np.zeros(5)  
+
+    return percent_classes
+
+        
 
 
 # images = load_images_from_folder(".\\ImageExtractor\\Images\\Divided")

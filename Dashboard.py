@@ -1,57 +1,34 @@
-from dash import html, dcc, Input, Output, callback, State, MATCH, ALL, no_update, Dash
-import dash
+from dash import html, dcc, Input, Output, callback, State, no_update, Dash
 import sys
 import os
-
-# Imports the root directory to the path in order to import project modules
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, project_root)
-
 import plotly.graph_objects as go
-import base64
-import re
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 import json
 import subprocess
-from math import cos, pi
-import pyproj
 from PIL import Image
 from PIL.ExifTags import TAGS
-import pathlib
-import csv
-
-import glob
 from PIL import Image
-import pandas as pd
-from utils.image_preparation import dictionary_to_array
-from utils.image_divider import split_image, merge_images_from_array
+from utils.image_preparation import dictionary_to_array, prepare_distribution
+from utils.image_divider import merge_images_from_array
 from mask_extractor import extract_masks
 import plotly.express as px
 import numpy as np
-import time
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
+
 
 PARAMETERS_PATH = "ImageExtractor\\parameters.json"
-mask_details = None
-
-
-def load_parameters():
-    try:
-        with open(PARAMETERS_PATH, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-
-
-def save_parameters(parameters):
-    with open(PARAMETERS_PATH, "w") as f:
-        json.dump(parameters, f, indent=4)
 
 
 app = Dash(__name__, suppress_callback_exceptions=True, assets_folder="assets")
+app.title = "ARKWIZ Image Classifier"
 
 start_time = datetime.now()
 
+
+# Layout of the dashboard
 app.layout = html.Div(
     className="main-container",
     children=[
@@ -69,7 +46,7 @@ app.layout = html.Div(
                 html.Div(
                     className="info-container",
                     children=[
-                        html.Div(id="timer", children="Time: 0"),
+                        #html.Div(id="timer", children="Time: 0"),
                     ],
                 ),
                 dcc.Interval(id="update-time", interval=1000, n_intervals=0),
@@ -97,7 +74,7 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        dcc.Graph(id="classification-graph"),
+                        dcc.Graph(id="classification-graph", style={'display': 'none'}),
                     ],
                     className="graph-container",
                 ),
@@ -107,39 +84,77 @@ app.layout = html.Div(
     ],
 )
 
+def load_parameters():
+    """
+    Load the parameters from a JSON file.
+    """
+    try:
+        with open(PARAMETERS_PATH, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+def save_parameters(parameters):
+    """
+    Save the parameters to a JSON file.
+    """
+    with open(PARAMETERS_PATH, "w") as f:
+        json.dump(parameters, f, indent=4)
+
+
 @app.callback(
     Output("classification-graph", "figure"),
-    [Input("submit-button", "n_clicks")],
+    Output("classification-graph", "style"),
+    [Input("update-trigger", "children")],
 )
-def update_pie_chart(n_clicks, src_classified):
-    if n_clicks is None or n_clicks == 0:
+def update_pie_chart(class_distribution):
+    """
+    This function is called when the image is downloaded and is done classifying.
+    It will display the classification distribution on the dashboard as a pie chart.
+    """
+    if not class_distribution:
         raise PreventUpdate
-    
-    try:
-        img_classified = np.array(Image.open(src_classified))
 
-    except:
-        raise PreventUpdate
-    
     try:
-        distribution = get_class_distribution(img_classified)
-    except:
+        # Read the class distribution from the file
+        with open('class_distribution.txt', 'r') as f:
+            distribution_line = f.readline()
+            class_distribution = list(map(float, distribution_line.strip('[]').split()))
+    except FileNotFoundError as e:
+        # If the file is not found, raise an error
+        print(f"Error reading from class_distribution.txt: {e}")
         raise PreventUpdate
     
-    labels = list(distribution.keys())
-    values = list(distribution.values())
+    labels = ["Background", "Building", "Trees", "Water", "Road"]
+    colors=["#24AECB", "#187588", "#0F4A56", "#061F24", "#020B0D"]
+    text_colors = ['white' if value < 5 else 'black' for value in class_distribution]
 
     fig = go.Figure(
-        data=[
-            go.Pie(
-                labels=labels,
-                values=values,
-                marker=dict(colors=["#24AECB", "#187588", "#0F4A56", "#061F24"]),
-                textinfo="label+percent",
-                insidetextfont=dict(color="white", size=10),
-                outsidetextfont=dict(color="white", size=10), 
-                )])
-    return fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        go.Pie(
+            labels=labels,
+            values=class_distribution,
+            hole=0.3,
+            textposition="inside",
+            insidetextorientation="horizontal",
+            marker=dict(colors=colors, line=dict(color='white', width=2)),
+            textinfo="label + percent",
+            outsidetextfont=dict(color='black', size=12),
+            insidetextfont=dict(color=text_colors, size=12),
+        )
+    )
+    fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        height=300,
+        width=300,
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=False)
+    )
+
+    return fig, {'display': 'block'}
 
 
 @app.callback(
@@ -148,9 +163,14 @@ def update_pie_chart(n_clicks, src_classified):
     [Input("update-trigger", "children")]
 )
 def update_image(trigger_value):
+    """
+    This function is called when the image is downloaded and is done classifying.
+    It will display the original and classified images on the dashboard.
+    """
     if not trigger_value:
         raise PreventUpdate
-
+    
+    # Load the images
     img_path_original = "ImageExtractor\\Images\\output_image.tif"
     img_path_classified = "ImageExtractor\\Images\\ClassifiedImage.png"
 
@@ -199,30 +219,51 @@ def update_timer(n):
     State("latitude-longitude-input", "value"),
 )
 def on_submit(n_clicks, input_value):
+    """
+    This function is called when the submit button is clicked.
+    It will classify the image and return the classification results.
+    """
     parameters = load_parameters()
-    script_configs = parameters.get("scripts", {})
 
     if n_clicks == 0:
         raise PreventUpdate
 
     try:
         lat, lon = map(float, input_value.split(","))
+        # Check if the coordinates are valid
         if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-            return "Latitude or longitude is out of range.", PreventUpdate
+            # If the coordinates are invalid, return an error message
+            return no_update, "Invalid coordinates."
+        
 
         else:
+            # If the coordinates are valid, classify the image
+            message = "Classifying for coordinates: {}, {}".format(lat, lon)
+
             parameters["center_lat"] = lat
             parameters["center_lon"] = lon
             save_parameters(parameters)
             subprocess.run(["python", "ImageExtractor/GG_Main.py"], check=True)
             mask_details = extract_masks()
+
+            # Example usage of the distributions
+            # Prints out and array of 4 elements consisting of the class distribution over the whole image in percentages
+            # 1st is background, 2nd is building, 3rd is trees, 4th is water and 5th is road
+            class_distribution = prepare_distribution(dictionary_to_array(mask_details, "class_distribution"))
+
+            with open('class_distribution.txt', 'w') as f:
+                f.write(str(class_distribution))
+
+            print(class_distribution)
+
+
             merge_images_from_array(
-                dictionary_to_array(mask_details),
+                dictionary_to_array(mask_details,"mask_image"),
                 "./ImageExtractor/Images/ClassifiedImage.png",
             )
-            return f"Coordinates: {lat}, {lon}", str(datetime.now())
+            return str(datetime.now()), message
     except ValueError:
-        return "Invalid coordinates format."
+        return no_update, f"Invalid coordinates format."
 
 
 if __name__ == "__main__":

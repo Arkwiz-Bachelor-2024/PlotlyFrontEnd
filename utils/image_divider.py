@@ -5,6 +5,11 @@ import os
 import shutil
 
 def clear_folder(folder):
+    """
+    Deletes all files in a given folder.
+
+    :param folder: the paths to the folder which content shall be removed
+    """
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -19,14 +24,17 @@ def split_image(image_path, output_dir, tile_size=(512, 512)):
     """
     Splits the image at image_path into tiles of size tile_size and saves them to output_dir,
     discarding any part of the image that doesn't fit into the tiles exactly.
+
+    :param image_path: Path to the image that shall be split.
+    :parm output_dir: Output path of the tiles.
+    :param tile_size: The size of the tiles, default 512px*512px.
     """
     # Load the image
     image = Image.open(image_path)
     clear_folder(output_dir)
     
 
-    # Calculate the number of tiles in each dimension
-    img_width, img_height = image.size
+    # Sets the dimention of the image, this is static.
     tiles_x = 8  
     tiles_y = 6 
 
@@ -51,7 +59,6 @@ def split_image(image_path, output_dir, tile_size=(512, 512)):
             tile.save(tile_path)
 
 
-# Example usage
 # split_image("ImageExtractor\\Images\\aerial_1km.tif", "ImageExtractor\\Images\\Divided")
 
 
@@ -86,14 +93,25 @@ def merge_images(
 
 def merge_images_from_array(tiles, output_path, grid_size=(8,6), tile_size=(512, 512)):
     """
-    Merge an array with images to one output image
+    Merge an array with images to one output image.
+
+    :param tiles: Array of images that shall be merged.
+    :param output_path: The path where the output image shall be stored:
+    :parm grid_size: The amount of tiles in x and y direction, default 8*6.
+    :param tile_size: The size of each tile, default 512*512 px.
     """
 
-    # These should be set to the number of tiles horizontally and vertically
+    # Create output image with the right dimentions
     merged_image = Image.new("RGB", (grid_size[0] * tile_size[0], grid_size[1] * tile_size[1]))
+
+    # Iterate over each tile
     for i, tile in enumerate(tiles):
+        # Define the x and y cordinated for the tile
         x = (i // grid_size[1]) * tile_size[0]
         y = (i % grid_size[1]) * tile_size[1]
+        # Paste the tile on the right place in the output image
         merged_image.paste(tile, (x, y))
+    
+    # Saves image to the output_path
     merged_image.save(output_path)
     print("Image saved to output path!")
