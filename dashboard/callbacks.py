@@ -9,13 +9,13 @@ import numpy as np
 from PIL import Image
 import json
 
-from app import app
+from dashboard.app import app
 from utils.image_preparation import prepare_distribution, dictionary_to_array
 from utils.image_divider import merge_images_from_array
-from mask_extractor import extract_masks
+from utils.mask_extractor import extract_masks
 
 
-PARAMETERS_PATH = "ImageExtractor\\parameters.json"
+PARAMETERS_PATH = "..\\ImageExtractor\\parameters.json"
 
 
 def load_parameters():
@@ -52,7 +52,7 @@ def update_pie_chart(class_distribution):
 
     try:
         # Read the class distribution from the file
-        with open('class_distribution.txt', 'r') as f:
+        with open('dashboard/class_distribution.txt', 'r') as f:
             distribution_line = f.readline()
             class_distribution = list(map(float, distribution_line.strip('[]').split()))
     except FileNotFoundError as e:
@@ -186,7 +186,7 @@ def on_submit(n_clicks, input_value):
             # 1st is background, 2nd is building, 3rd is trees, 4th is water and 5th is road
             class_distribution = prepare_distribution(dictionary_to_array(mask_details, "class_distribution"))
 
-            with open('class_distribution.txt', 'w') as f:
+            with open('dashboard/class_distribution.txt', 'w') as f:
                 f.write(str(class_distribution))
 
             print(class_distribution)

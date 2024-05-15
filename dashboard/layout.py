@@ -1,5 +1,5 @@
 from dash import html, dcc
-from app import app
+from dashboard.app import app
 
 
 def init_layout():

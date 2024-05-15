@@ -12,7 +12,7 @@ from model.mask_generator import generate_masks_with_details
 
 # The machine learning model that shall preform the classification.
 MACHINE_LEARNING_MODEL = (
-    "UNETplus_2x_100e_16b_Poly_Adam_low_wBCE_milestones_warmup+DA_mid"
+    "base_model.keras"
 )
 
 
@@ -22,8 +22,8 @@ def extract_masks():
     """
 
     # Paths for the images
-    image_path = ".\\ImageExtractor\\Images\\output_image.tif"
-    tiles_path = ".\\ImageExtractor\\Images\\Divided"
+    image_path = "ImageExtractor\\Images\\output_image.tif"
+    tiles_path = "ImageExtractor\\Images\\Divided"
 
     # Split the image into tiles
     split_image(image_path, tiles_path)

@@ -14,10 +14,9 @@ from math import cos, pi
 
 # This script is called "GG_Main.py" and is used to run the various scripts for downloading and processing geospatial data.
 
-
 # Load parameters from a JSON file
 print("Loading parameters from JSON")
-with open('ImageExtractor\\parameters.json', 'r') as f:
+with open('ImageExtractor/parameters.json', 'r') as f:
     parameters = json.load(f)
 
 # Extract script configurations from the loaded parameters
@@ -41,7 +40,6 @@ def calculate_bounding_box(center_lat, center_lon, half_size_m):
     
     return bbox_utm
 
-
 print("Bounding box calculation function defined")
 
 scripts_to_run = list(script_configs.keys())
@@ -61,7 +59,7 @@ with tempfile.TemporaryDirectory() as tempdir:
 
             print(f"Bounding Box for {script_name} in UTM (EPSG:25833): {bbox_utm}")
             
-            subprocess.run(["python", script_name, str(bbox_utm[0]), str(bbox_utm[1]), str(bbox_utm[2]), str(bbox_utm[3]), tempdir, final_output_path], check=True)
+            subprocess.run(["python", os.path.join("ImageExtractor", script_name), str(bbox_utm[0]), str(bbox_utm[1]), str(bbox_utm[2]), str(bbox_utm[3]), tempdir, final_output_path], check=True)
         else:
             print(f"Skipping execution of {script_name} as per configuration.")
 
@@ -116,7 +114,6 @@ for script_name, config in parameters['scripts'].items():
         print(f"Skipping cropping for {script_name} as per configuration.")
 
 # Deleting temp files with _DL in name
-
 def delete_dl_files(output_location):
     for filename in os.listdir(output_location):
         if '_DL' in filename:

@@ -1,6 +1,6 @@
-from app import app
-import layout
-import callbacks
+from dashboard.app import app
+import dashboard.layout as layout
+import dashboard.callbacks as callbacks
 
 layout.init_layout()
 
