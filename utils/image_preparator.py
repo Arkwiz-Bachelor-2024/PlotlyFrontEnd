@@ -6,7 +6,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 from natsort import natsorted
 from PIL import Image
-from utils.image_divider import merge_images_from_array
+from utils.image_handler import merge_images_from_array
 import tensorflow as tf
 from tensorflow import data as tf_data
 from tensorflow import io as tf_io

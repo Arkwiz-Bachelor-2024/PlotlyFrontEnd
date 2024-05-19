@@ -3,7 +3,7 @@ import numpy as np
 import math
 import os
 
-from utils.image_preparation import load_images_from_folder,__sort_directory__
+from image_preparator import load_images_from_folder,__sort_directory__
 
 
 def split_image(image_path, output_dir, tile_size=(512, 512)):

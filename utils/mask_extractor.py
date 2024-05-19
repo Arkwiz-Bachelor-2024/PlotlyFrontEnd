@@ -5,8 +5,8 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
-from utils.image_divider import split_image, merge_images_from_array
-from utils.image_preparation import load_images_from_folder
+from utils.image_handler import split_image, merge_images_from_array
+from utils.image_preparator import load_images_from_folder
 from model.mask_generator import generate_masks_with_details
 
 

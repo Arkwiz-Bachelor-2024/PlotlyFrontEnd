@@ -10,12 +10,12 @@ from PIL import Image
 import json
 
 from dashboard.app import app
-from utils.image_preparation import prepare_distribution, dictionary_to_array
-from utils.image_divider import merge_images_from_array
+from utils.image_preparator import prepare_distribution, dictionary_to_array
+from utils.image_handler import merge_images_from_array
 from utils.mask_extractor import extract_masks
 
 
-PARAMETERS_PATH = "..\\ImageExtractor\\parameters.json"
+PARAMETERS_PATH = "ImageExtractor\parameters.json"
 
 
 def load_parameters():

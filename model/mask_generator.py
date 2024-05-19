@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-from utils.image_preparation import load_images_from_folder
+from utils.image_preparator import load_images_from_folder
 
 from PIL import Image
 import matplotlib.cm as cm
